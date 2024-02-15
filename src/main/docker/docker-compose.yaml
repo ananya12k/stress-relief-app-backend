@@ -1,0 +1,18 @@
+version: '2'
+
+services:
+  app:
+    image: 'docker-spring-boot-postgres:latest'
+    build:
+      context:  ../../../
+      dockerfile: src/main/docker/Dockerfile
+    ports:
+      - "3000:3000"
+    container_name: app
+    depends_on:
+      - db
+
+  db:
+    build:
+      context:  ../../../
+      dockerfile: src/main/docker/Dockerfile.postgres
