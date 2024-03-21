@@ -1,15 +1,20 @@
 package com.example.jwt_auth;
 
 import jakarta.validation.constraints.NotNull;
-import lombok.Value;
+import lombok.*;
 
 import java.io.Serializable;
 
 /**
  * DTO for {@link User}
  */
-@Value
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+
 public class UserDto implements Serializable {
+    Long id;
     @NotNull(message = "Username cannot be blank")
     String username;
     @NotNull(message = "Email cannot be blank")
@@ -19,5 +24,8 @@ public class UserDto implements Serializable {
 
     @NotNull(message = "Confirm Password cannot be blank")
     String confirmPassword;
+    String login;
+    String token;
+
 
 }
