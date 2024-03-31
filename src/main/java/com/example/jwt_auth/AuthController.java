@@ -1,23 +1,33 @@
 package com.example.jwt_auth;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 
 @CrossOrigin("*")
-@RequiredArgsConstructor
 @RestController
 public class AuthController {
 
     private final UserService userService;
     private final UserAuthenticationProvider userAuthenticationProvider;
+
+    public AuthController(UserService userService, UserAuthenticationProvider userAuthenticationProvider) {
+        this.userService = userService;
+        this.userAuthenticationProvider = userAuthenticationProvider;
+    }
+
+    @GetMapping("/it")
+    public String hi() {
+        return "Hello World";
+    }
 
     @PostMapping("/login")
     public ResponseEntity<UserDto> login(@RequestBody @Valid CredentialsDto credentialsDto) {
@@ -27,11 +37,31 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserDto> register(@RequestBody @Valid SignUpDto user) {
+    public ResponseEntity<UserDto> register(@RequestBody @Valid UserDto user) {
         UserDto createdUser = userService.register(user);
         createdUser.setToken(userAuthenticationProvider.createToken(user.getLogin()));
         return ResponseEntity.created(URI.create("/users/" + createdUser.getId())).body(createdUser);
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletRequest request, BlacklistedTokenRepository repository) {
+        String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+        String token = null;
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            token = authorizationHeader.substring(7); // Skip "Bearer " prefix
+        }
+
+        if (token != null) {
+            // Check if token is already blacklisted
+            if (!repository.existsByToken(token)) {
+                repository.save(new BlacklistedToken(token)); // Add token to blacklist
+            }
+        }
+
+        SecurityContextHolder.clearContext();
+        return ResponseEntity.noContent().build();
+    }
+
 
 }
 //@RestController

@@ -1,10 +1,6 @@
 package com.example.jwt_auth;
 
 import jakarta.persistence.*;
-import org.springframework.context.annotation.Bean;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
 
 @Entity
 @Table(name = "users")
@@ -12,12 +8,19 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(unique = true)
     private String username;
 
     @Column(unique = true)
     private String email;
+
     private String password;
+
+    // Additional fields for first name and last name
+    private String firstName;
+
+    private String lastName;
 
     public Long getId() {
         return id;
@@ -43,20 +46,27 @@ public class User {
         this.email = email;
     }
 
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
     public String getPassword() {
         return password;
     }
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    @Component
-    public static class PasswordConfig {
-
-        @Bean
-        public PasswordEncoder passwordEncoder() {
-            return new BCryptPasswordEncoder();
-        }
     }
 }

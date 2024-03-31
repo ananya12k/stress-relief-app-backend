@@ -6,10 +6,11 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
-
+    @Mapping(target = "token", ignore = true)
+    @Mapping(target = "confirmPassword", ignore = true)
     UserDto toUserDto(User user);
 
-    @Mapping(target = "password", ignore = true)
-    User signUpToUser(SignUpDto signUpDto);
+    User toUser(UserDto userDto);
 
 }
+
