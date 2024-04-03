@@ -1,8 +1,11 @@
 package com.example.jwt_auth;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
@@ -29,5 +32,11 @@ public class GlobalExceptionHandler extends RuntimeException {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error");
     }
 
-    // Add more exception handlers for other types of exceptions if needed
+    @ExceptionHandler(value = {AppException.class})
+    @ResponseBody
+    public ResponseEntity<ErrorDto> handleException(AppException ex) {
+        return ResponseEntity
+                .status(ex.getStatus())
+                .body(ErrorDto.builder().message(ex.getMessage()).build());
+    }
 }
