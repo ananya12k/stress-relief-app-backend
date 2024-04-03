@@ -4,16 +4,19 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 
-@CrossOrigin("*")
+@CrossOrigin(origins = "http://localhost:3000",  allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.DELETE,})
 @RestController
+@RequestMapping("/api")
 public class AuthController {
 
     private final UserService userService;
@@ -29,15 +32,20 @@ public class AuthController {
         return "Hello World";
     }
 
-    @PostMapping("/login")
+    @PostMapping("/mylogin")
     public ResponseEntity<UserDto> login(@RequestBody @Valid CredentialsDto credentialsDto) {
         UserDto userDto = userService.login(credentialsDto);
         userDto.setToken(userAuthenticationProvider.createToken(userDto.getLogin()));
         return ResponseEntity.ok(userDto);
     }
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @PostMapping("/register")
     public ResponseEntity<UserDto> register(@RequestBody @Valid UserDto user) {
+
+        user.setPassword(passwordEncoder.encode(user.getPassword())); // Hash password before saving
         UserDto createdUser = userService.register(user);
         createdUser.setToken(userAuthenticationProvider.createToken(user.getLogin()));
         return ResponseEntity.created(URI.create("/users/" + createdUser.getId())).body(createdUser);
