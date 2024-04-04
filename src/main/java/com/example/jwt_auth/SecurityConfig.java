@@ -9,6 +9,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -28,18 +29,16 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .exceptionHandling(customizer -> customizer.authenticationEntryPoint(userAuthenticationEntryPoint))
-                .addFilterBefore(new JwtAuthFilter(userAuthenticationProvider), BasicAuthenticationFilter.class)
-                .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers(HttpMethod.POST, "api/mylogin").permitAll()
-//                        .requestMatchers(HttpMethod.GET, "api/login").permitAll()
+                        .requestMatchers(HttpMethod.GET, "api/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "api/register").permitAll()
 //                        .requestMatchers(HttpMethod.GET, "api/register").permitAll()
                         .requestMatchers(HttpMethod.POST, "api/logout").permitAll()
                         .requestMatchers(HttpMethod.GET, "api/it").permitAll()
                         .requestMatchers(HttpMethod.POST, "diary/newentry").permitAll()
                         .requestMatchers(HttpMethod.POST, "diary/allentries").permitAll()
-                        .anyRequest().authenticated());
+                        .anyRequest().authenticated()).sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)).addFilterBefore(new JwtAuthFilter(userAuthenticationProvider), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
